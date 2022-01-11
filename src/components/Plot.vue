@@ -29,38 +29,44 @@ export default Vue.extend({
 
   methods: {
     fetchData: async function () {
-      const { data } = await api.get("forecast", {
-        params: {
-          latitude: -5.89,
-          longitude: -35.18,
-          hourly: this.property,
-        },
+      if (!("geolocation" in navigator)) {
+        return alert("GPS not available");
+      }
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const { data } = await api.get("forecast", {
+          params: {
+            latitude: position.coords.latitude.toFixed(2),
+            longitude: position.coords.longitude.toFixed(2),
+            hourly: this.property,
+          },
+        });
+
+        this.traces = [
+          {
+            x: data.hourly.time,
+            y: data.hourly["temperature_2m"],
+            mode: "markers+lines",
+            marker: { size: 2, color: "red" },
+            line: { color: "red" },
+            name: "Temperature",
+          },
+        ];
+        this.layout = {
+          showlegend: false,
+          margin: {
+            l: 50,
+            r: 50,
+            b: 50,
+            t: 50,
+          },
+          xaxis: {
+            showticklabels: true,
+          },
+          yaxis: {
+            showticklabels: true,
+          },
+        };
       });
-      this.traces = [
-        {
-          x: data.hourly.time,
-          y: data.hourly["temperature_2m"],
-          mode: "markers+lines",
-          marker: { size: 2, color: "red" },
-          line: { color: "red" },
-          name: "Temperature",
-        },
-      ];
-      this.layout = {
-        showlegend: false,
-        margin: {
-          l: 50,
-          r: 50,
-          b: 50,
-          t: 50,
-        },
-        xaxis: {
-          showticklabels: true,
-        },
-        yaxis: {
-          showticklabels: true,
-        },
-      };
     },
   },
 
