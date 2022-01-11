@@ -12,6 +12,7 @@
 import Vue from "vue";
 import { Plotly } from "vue-plotly";
 import { api } from "@/api";
+import { getSimpleMovingAverage } from "@/utils/movingAverage";
 
 export default Vue.extend({
   name: "Plot",
@@ -41,14 +42,25 @@ export default Vue.extend({
           },
         });
 
+        const movingAverage = getSimpleMovingAverage(
+          data.hourly[this.property]
+        );
         this.traces = [
           {
             x: data.hourly.time,
-            y: data.hourly["temperature_2m"],
+            y: data.hourly[this.property],
             mode: "markers+lines",
             marker: { size: 2, color: "red" },
             line: { color: "red" },
             name: "Temperature",
+          },
+          {
+            x: data.hourly.time,
+            y: movingAverage,
+            fillcolor: "primary",
+            name: "Moving Average",
+            showLegend: false,
+            type: "scatter",
           },
         ];
         this.layout = {
